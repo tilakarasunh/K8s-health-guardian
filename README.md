@@ -289,32 +289,6 @@ OPENAI_KEY=$(az cognitiveservices account keys list \
 LOGIC_APP_WEBHOOK_URL="https://prod-xx.logic.azure.com/..."
 ```
 
-#### 1.3 Create Azure Key Vault
-
-```bash
-# Create Key Vault
-az keyvault create \
-  --name health-guardian-kv \
-  --resource-group <YOUR_RESOURCE_GROUP> \
-  --enable-rbac-authorization
-
-# Store secrets
-az keyvault secret set \
-  --vault-name health-guardian-kv \
-  --name azure-openai-endpoint \
-  --value "$OPENAI_ENDPOINT"
-
-az keyvault secret set \
-  --vault-name health-guardian-kv \
-  --name azure-openai-api-key \
-  --value "$OPENAI_KEY"
-
-az keyvault secret set \
-  --vault-name health-guardian-kv \
-  --name logic-app-webhook-url \
-  --value "$LOGIC_APP_WEBHOOK_URL"
-```
-
 ### Step 2: Build & Push Container Image
 
 ```bash
