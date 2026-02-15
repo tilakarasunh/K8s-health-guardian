@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: health-guardian
+  namespace: default
+spec:
+  schedule: "0 9 * * *"  # Daily at 9 AM UTC
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            app: health-guardian
+        spec:
+          serviceAccountName: health-guardian
+          restartPolicy: OnFailure
+          containers:
+          - name: health-guardian
+            image: repo.azurecr.io/health-guardian:1.4
+            imagePullPolicy: Always
+            env:
+            - name: AZURE_OPENAI_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: health-guardian-secrets
+                  key: AZURE_OPENAI_ENDPOINT
+            - name: AZURE_OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: health-guardian-secrets
+                  key: AZURE_OPENAI_API_KEY
+            - name: LOGIC_APP_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: health-guardian-secrets
+                  key: LOGIC_APP_WEBHOOK_URL
+            - name: REPORT_RECIPIENTS
+              valueFrom:
+                configMapKeyRef:
+                  name: health-guardian-config
+                  key: REPORT_RECIPIENTS
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+
