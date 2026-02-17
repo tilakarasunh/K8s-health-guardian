@@ -70,10 +70,10 @@ Health Guardian is an automated AKS (Azure Kubernetes Service) health checking s
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    AKS Cluster                              │
-│                                                              │
+│                                                             │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │         Health Guardian CronJob (Daily 9 AM UTC)     │   │
-│  │                                                       │   │
+│  │                                                      │   │
 │  │  ┌─────────────────────────────────────────────────┐ │   │
 │  │  │ KubernetesMonitor Module                        │ │   │
 │  │  │ - Collects pod status                           │ │   │
@@ -82,7 +82,7 @@ Health Guardian is an automated AKS (Azure Kubernetes Service) health checking s
 │  │  │ - Retrieves cluster events (24h window)         │ │   │
 │  │  │ - Identifies failed pods with diagnostics       │ │   │
 │  │  └─────────────────────────────────────────────────┘ │   │
-│  │                        ↓                              │   │
+│  │                        ↓                             │   │
 │  │  ┌─────────────────────────────────────────────────┐ │   │
 │  │  │ AIAnalyzer Module                               │ │   │
 │  │  │ - Prepares contextualized cluster data          │ │   │
@@ -90,22 +90,22 @@ Health Guardian is an automated AKS (Azure Kubernetes Service) health checking s
 │  │  │ - Parses JSON health analysis response          │ │   │
 │  │  │ - Fallback to rule-based analysis on failure    │ │   │
 │  │  └─────────────────────────────────────────────────┘ │   │
-│  │                        ↓                              │   │
+│  │                        ↓                             │   │
 │  │  ┌─────────────────────────────────────────────────┐ │   │
 │  │  │ ReportGenerator Module                          │ │   │
 │  │  │ - Formats data as polished HTML report          │ │   │
-│  │  │ - Generates metric visualizations              │ │   │
+│  │  │ - Generates metric visualizations               │ │   │
 │  │  │ - Compiles issue & recommendation summaries     │ │   │
 │  │  │ - Delivers via Azure Logic Apps webhook         │ │   │
 │  │  └─────────────────────────────────────────────────┘ │   │
 │  └──────────────────────────────────────────────────────┘   │
-│                        ↓                                      │
-│         ┌─────────────────────────────────────────┐          │
-│         │  Azure Key Vault                        │          │
-│         │  - Azure OpenAI credentials             │          │
-│         │  - Logic Apps webhook URL               │          │
-│         └─────────────────────────────────────────┘          │
-│                        ↓                                      │
+│                        ↓                                    │
+│         ┌─────────────────────────────────────────┐         │
+│         │  K8s secrets                            │         │
+│         │  - Azure OpenAI credentials             │         │
+│         │  - Logic Apps webhook URL               │         │
+│         └─────────────────────────────────────────┘         |
+│                        ↓                                    │
 └─────────────────────────────────────────────────────────────┘
                          ↓
       ┌──────────────────────────────────────┐
@@ -197,7 +197,6 @@ Health Guardian is an automated AKS (Azure Kubernetes Service) health checking s
   - Model: `gpt-4o-mini`
   - API Version: `2024-02-15-preview`
   - Sufficient quota for regular analysis requests
-- **Azure Key Vault** for secure credential storage
 - **Azure Logic Apps** for email delivery (or alternative email service)
 - **Container Registry** (Azure Container Registry recommended)
 
@@ -540,7 +539,7 @@ kubectl logs -n default <pod-name> --previous
 |-------|-----------|----------|
 | **Pod in CrashLoopBackOff** | Check pod logs | `kubectl logs -n default <pod-name>` |
 | **RBAC Forbidden errors** | Permissions issue | Verify `rbac.yaml` applied and ServiceAccount bound |
-| **Azure OpenAI auth fails** | Invalid credentials | Verify secrets in Key Vault match current API keys |
+| **Azure OpenAI auth fails** | Invalid credentials | Verify secrets in K8s match current API keys value |
 | **Metrics API error** | Metrics Server not installed | `kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/.../components.yaml` |
 | **Logic Apps webhook fails** | URL invalid/expired | Regenerate webhook in Logic Apps and update secret |
 | **No email received** | Logic App flow issue | Test Logic App with sample payload manually |
